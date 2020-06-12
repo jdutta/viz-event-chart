@@ -1,0 +1,32 @@
+[
+  {
+    "user_id": 28,
+    "message": "Zombie::QuestionAnsweredCorrectly",
+    "user_email": "shoukatali+chemst5@dialedin.io",
+    "@timestamp": "2020-06-09T21:24:38.409Z",
+    "assignment_id": "65",
+    "score": "17",
+    "zombie_question_id": "668",
+    "response": "ceremony"
+  },
+  {
+    "user_id": 11,
+    "message": "Zombie::QuestionAnsweredIncorrectly",
+    "user_email": "shoukatali+chemst3@dialedin.io",
+    "@timestamp": "2020-06-09T21:25:08.824Z",
+    "assignment_id": "65",
+    "score": "20",
+    "zombie_question_id": "672",
+    "response": "teachers"
+  },
+  {
+    "user_id": 11,
+    "message": "Zombie::QuestionAnsweredIncorrectly",
+    "user_email": "shoukatali+chemst3@dialedin.io",
+    "@timestamp": "2020-06-09T21:24:30.927Z",
+    "assignment_id": "65",
+    "score": "25",
+    "zombie_question_id": "668",
+    "response": "festival"
+  }
+]

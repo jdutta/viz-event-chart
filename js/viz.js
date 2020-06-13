@@ -14,7 +14,7 @@
         barGap: 5
     }
     // let engagementDataFile = 'data/distracted_engaged_info.json'
-    let engagementDataFile = 'data/prez1_all_users_gotcha_times.json'
+    let engagementDataFile = 'data/5207_time_bounded_all_users_gotcha_times.json'
     // let quizDataFile = 'data/zombie_responses_info.json'
     let quizDataFile = 'data/prez1_ruts_data.json'
 
@@ -39,7 +39,7 @@
     }
 
     function processData(payload) {
-        let filteredEngagementData = _.filter(payload.engagementData, o => o.event === 'attentive')
+        let filteredEngagementData = _.filter(payload.engagementData, o => ['opened', 'closed'].indexOf(o.event) < 0 )
         let userToEngagementData = _.groupBy(filteredEngagementData, o => o.user_id)
         console.log('userToEngagementData', userToEngagementData)
         let minTs = _.min(filteredEngagementData.map(o => new Date(o.start_time).getTime()))
@@ -59,8 +59,8 @@
 
         let margin = config.margin
         let containerSize = {
-            // w: vizWrapperEl.offsetWidth,
-            w: 3000,
+            w: vizWrapperEl.offsetWidth,
+            // w: 3000,
             h: Math.max(vizWrapperEl.offsetHeight, margin.top + margin.bottom + data.users.length * (config.barHeight + config.barGap))
         }
 
@@ -84,15 +84,11 @@
                         .classed('user-engagement', true)
                 .attr('transform', 'translate('+[0, userIndex * (config.barHeight + config.barGap)]+')')
             gUserEngagement.append('svg:rect')
-                .classed('distraction', true)
+                .classed('user-timeline', true)
                 .attr('x', 0)
                 .attr('y', 0)
                 .attr('width', width)
                 .attr('height', config.barHeight)
-            gUserEngagement.append('svg:text')
-                .attr('x', 0)
-                .attr('y', 15)
-                .text(`User ${userId}`)
             engagementData.forEach(o => {
                 let startTs = new Date(o.start_time).getTime()
                 let endTs = new Date(o.end_time).getTime()
@@ -102,15 +98,21 @@
                     return
                 }
                 // console.log('x1 x2', x1, x2)
+                let isAttention = o.event === 'attentive'
                 gUserEngagement.append('svg:rect')
-                    .classed('attention', true)
+                    .classed('attention', isAttention)
+                    .classed('distraction', !isAttention)
                     .attr('x', x1)
                     .attr('y', 0)
                     .attr('width', x2 - x1)
                     .attr('height', config.barHeight)
                     .append('title')
-                    .text(`Attention span for user ${o.user_id} from ${o.start_time} to ${o.end_time}`)
+                    .text(`${isAttention ? 'Attention' : 'Distraction'} span for user ${o.user_id} from ${o.start_time} to ${o.end_time}`)
             })
+            gUserEngagement.append('svg:text')
+                .attr('x', 0)
+                .attr('y', 15)
+                .text(`User ${userId}`)
         })
     }
 

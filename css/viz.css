@@ -3,14 +3,20 @@
 }
 .svg-wrapper {
     // width: 70%;
-    height: 500px;
-    box-shadow: 0 0 0 1px red;
+    height: calc(100vh - 100px);
+    box-shadow: 0 0 0 1px #777;
     overflow: auto;
 }
 
-g.user-engagement rect.distraction {
-    fill: #f9f2f2;
+g.user-engagement rect.user-timeline {
+    fill: #f7f7f7;
 }
 g.user-engagement rect.attention {
-    fill: #64ad1b;
+    fill: #71c51f;
+}
+g.user-engagement rect.distraction {
+    fill: #bd3209;
+}
+g.user-engagement text {
+    text-shadow: 1px 1px 1px #fff;
 }

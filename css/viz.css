@@ -2,7 +2,15 @@
     font-family: Optima, serif;
 }
 .svg-wrapper {
-    width: 70%;
-    height: 300px;
+    // width: 70%;
+    height: 500px;
     box-shadow: 0 0 0 1px red;
+    overflow: auto;
+}
+
+g.user-engagement rect.distraction {
+    fill: #f9f2f2;
+}
+g.user-engagement rect.attention {
+    fill: #64ad1b;
 }

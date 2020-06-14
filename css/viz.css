@@ -17,6 +17,8 @@ g.user-engagement rect.attention {
 g.user-engagement rect.distraction {
     fill: #bd3209;
 }
-g.user-engagement text {
+g.user-engagement text.user-label {
+    font-family: Courier, serif;
+    font-size: 10px;
     text-shadow: 1px 1px 1px #fff;
 }

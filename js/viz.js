@@ -10,11 +10,12 @@
             bottom: 10,
             left: 10
         },
+        userLabelWidth: 150,
         barHeight: 20,
         barGap: 5
     }
     // let engagementDataFile = 'data/distracted_engaged_info.json'
-    let engagementDataFile = 'data/5207_time_bounded_all_users_gotcha_times.json'
+    let engagementDataFile = 'data/5213_time_bounded_all_users_gotcha_times.json'
     // let quizDataFile = 'data/zombie_responses_info.json'
     let quizDataFile = 'data/prez1_ruts_data.json'
 
@@ -41,16 +42,41 @@
     function processData(payload) {
         let filteredEngagementData = _.filter(payload.engagementData, o => ['opened', 'closed'].indexOf(o.event) < 0 )
         let userToEngagementData = _.groupBy(filteredEngagementData, o => o.user_id)
-        console.log('userToEngagementData', userToEngagementData)
+        // console.log('userToEngagementData', userToEngagementData, payload.quizData)
         let minTs = _.min(filteredEngagementData.map(o => new Date(o.start_time).getTime()))
         let maxTs = _.max(filteredEngagementData.map(o => new Date(o.end_time).getTime()))
-        console.log('minTs',minTs, maxTs)
+        console.log('minTs, maxTs', minTs, maxTs)
+
+        let userIdToEmail = {}
+        payload.quizData.forEach(o => {
+            userIdToEmail[o.user_id] = o.user_email
+        })
 
         return {
             userToEngagementData,
+            userIdToEmail,
             users: Object.keys(userToEngagementData),
             minTs,
             maxTs
+        }
+    }
+
+    function textEllipsis(width, padding) {
+        return function () {
+            let self = d3.select(this),
+                textLength = self.node().getComputedTextLength(),
+                text = self.text();
+            while (textLength > (width - 2 * padding) && text.length > 0) {
+                text = text.slice(0, -1);
+                self.text(text + '...');
+                textLength = self.node().getComputedTextLength();
+            }
+        }
+    }
+
+    function removeChildNodes(el) {
+        while (el.childNodes.length) {
+            el.removeChild(el.childNodes[0])
         }
     }
 
@@ -60,14 +86,13 @@
         let margin = config.margin
         let containerSize = {
             w: vizWrapperEl.offsetWidth,
-            // w: 3000,
             h: Math.max(vizWrapperEl.offsetHeight, margin.top + margin.bottom + data.users.length * (config.barHeight + config.barGap))
         }
 
         let width = containerSize.w - margin.left - margin.right
         let height = containerSize.h - margin.top - margin.bottom
         let gRootXY = [margin.left, margin.top]
-        // removeChildnodes(vizEl)
+        removeChildNodes(vizEl)
 
         let svg = d3.select(vizEl)
             .attr('width', containerSize.w)
@@ -76,9 +101,10 @@
 
         let xScale = d3.scaleLinear()
             .domain([data.minTs, data.maxTs])
-            .range([0, width])
+            .range([config.userLabelWidth, width])
 
         data.users.forEach((userId, userIndex) => {
+            let userEmail = data.userIdToEmail[userId]
             let engagementData = data.userToEngagementData[userId]
             let gUserEngagement = gRoot.append('svg:g')
                         .classed('user-engagement', true)
@@ -109,10 +135,16 @@
                     .append('title')
                     .text(`${isAttention ? 'Attention' : 'Distraction'} span for user ${o.user_id} from ${o.start_time} to ${o.end_time}`)
             })
-            gUserEngagement.append('svg:text')
+            let userLabel = userEmail || `User ${userId}`
+            let gText = gUserEngagement.append('svg:text')
+                .classed('user-label', true)
                 .attr('x', 0)
                 .attr('y', 15)
-                .text(`User ${userId}`)
+                .text(userLabel)
+            gText.each(textEllipsis(config.userLabelWidth, 0))
+
+            gText.append('svg:title')
+                .text(userLabel)
         })
     }
 

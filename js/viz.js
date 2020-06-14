@@ -3,6 +3,7 @@
     let quizData = []
     let vizEl = null
     let vizWrapperEl = null
+    let sortInputEl = null
     let config = {
         margin: {
             top: 10,
@@ -17,15 +18,32 @@
     // let engagementDataFile = 'data/distracted_engaged_info.json'
     let engagementDataFile = 'data/5213_time_bounded_all_users_gotcha_times.json'
     // let quizDataFile = 'data/zombie_responses_info.json'
-    let quizDataFile = 'data/prez1_ruts_data.json'
+    let quizDataFile = 'data/5213_ruts_data.json'
+    const sortByEnums = {
+        ATTENTION: 'attention',
+        DISTRACTION: 'distraction',
+        QUIZZES: 'quizzes',
+        ANSWERS_CORRECT: 'answers-correct'
+    }
 
     function init() {
+        let drawChartPayload = {
+            engagementData: distractedEngagedData,
+            quizData: quizData
+        }
         // console.log('init', distractedEngagedData, quizData)
         vizWrapperEl = document.getElementById('vizWrapper')
         vizEl = document.getElementById('viz')
+        sortInputEl = document.getElementById('sort-input-selection')
+        sortInputEl.addEventListener('change', function (evt) {
+            drawChart({
+                ...drawChartPayload,
+                sortBy: evt.target.value
+            })
+        })
         drawChart({
-            engagementData: distractedEngagedData,
-            quizData: quizData
+            ...drawChartPayload,
+            sortBy: sortByEnums.ATTENTION
         })
     }
 
@@ -53,11 +71,57 @@
             userIdToEmail[o.user_id] = o.user_email
         })
 
+        let userStats = {} // userId -> { totalAttention, totalDistraction, totalQuizzes, totalCorrectAnswers }
+        let users = Object.keys(userToEngagementData)
+        users.forEach(userId => {
+            let engagementData = userToEngagementData[userId]
+            let totalAttention = 0
+            let totalDistraction = 0
+            engagementData.forEach(o => {
+                if (o.event === 'attentive') {
+                    totalAttention += o.length
+                } else {
+                    totalDistraction += o.length
+                }
+            })
+
+            let quizData = userToQuizData[userId]
+            let totalQuizzes = quizData ? quizData.length : 0
+            let totalCorrectAnswers = 0
+            if (totalQuizzes) {
+                totalCorrectAnswers = quizData.filter(o => o.message === 'Zombie::QuestionAnsweredCorrectly').length
+            }
+
+            userStats[userId] = {
+                totalAttention,
+                totalDistraction,
+                totalQuizzes,
+                totalCorrectAnswers
+            }
+        })
+        // console.log('userStats', userStats)
+
+        const sortByToField = {
+            [sortByEnums.ATTENTION]: 'totalAttention',
+            [sortByEnums.DISTRACTION]: 'totalDistraction',
+            [sortByEnums.QUIZZES]: 'totalQuizzes',
+            [sortByEnums.ANSWERS_CORRECT]: 'totalCorrectAnswers',
+        }
+        // sort users array based on payload.sortBy
+        function comparatorFn(uid1, uid2) {
+            let stat1 = userStats[uid1]
+            let stat2 = userStats[uid2]
+            let field = sortByToField[payload.sortBy]
+            return stat1[field] === stat2[field] ? 0 : (stat1[field] > stat2[field] ? -1 : 1)
+        }
+        users = users.sort(comparatorFn)
+
         return {
             userToEngagementData,
             userToQuizData,
             userIdToEmail,
-            users: Object.keys(userToEngagementData),
+            userStats,
+            users,
             minTs,
             maxTs
         }
@@ -147,7 +211,7 @@
             gText.each(textEllipsis(config.userLabelWidth, 0))
 
             gText.append('svg:title')
-                .text(userLabel)
+                .text(userLabel + ': ' + JSON.stringify(data.userStats[userId]))
 
             if (quizData) {
                 let gUserQuiz = gRoot.append('svg:g')
@@ -155,8 +219,7 @@
                     .attr('transform', 'translate('+[0, userIndex * (config.barHeight + config.barGap)]+')')
                 quizData.forEach(o => {
                     let ts = new Date(o['@timestamp']).getTime()
-                    // TODO: get correct quiz data file and remove this offset
-                    let x = xScale(ts) + 73321
+                    let x = xScale(ts)
                     let isCorrect = o.message === 'Zombie::QuestionAnsweredCorrectly'
                     let isIncorrect = o.message === 'Zombie::QuestionAnsweredIncorrectly'
                     gUserQuiz.append('svg:circle')
@@ -164,9 +227,9 @@
                         .classed('answer-incorrect', isIncorrect)
                         .attr('cx', x)
                         .attr('cy', config.barHeight / 2)
-                        .attr('r', 3)
+                        .attr('r', 5)
                         .append('title')
-                        .text(`Response: ${o.response}`)
+                        .text(`Response: ${o.response}, Timestamp: ${o['@timestamp']}`)
                 })
             }
         })

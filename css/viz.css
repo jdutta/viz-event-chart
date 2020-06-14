@@ -1,6 +1,12 @@
 .app {
     font-family: Optima, serif;
 }
+.header, .input-select-sort {
+    display: inline-block;
+}
+.input-select-sort {
+    margin-left: 20px;
+}
 .svg-wrapper {
     // width: 70%;
     height: calc(100vh - 100px);
@@ -22,11 +28,12 @@ g.user-engagement text.user-label {
     font-size: 10px;
     text-shadow: 1px 1px 1px #fff;
 }
+g.user-quiz circle {
+    stroke: white;
+}
 g.user-quiz circle.answer-correct {
     fill: green;
-    stroke: white;
 }
 g.user-quiz circle.answer-incorrect {
     fill: red;
-    stroke: white;
 }

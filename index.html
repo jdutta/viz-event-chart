@@ -6,7 +6,16 @@
 </head>
 
 <body class="app">
-<h2>Event Chart</h2>
+<h2 class="header">Event Chart</h2>
+<div class="input-select-sort">
+    <label>Sort by:</label>
+    <select id="sort-input-selection">
+        <option value="attention" selected>Attention</option>
+        <option value="distraction">Distraction</option>
+        <option value="quizzes">Quizzes Attempted</option>
+        <option value="answers-correct">Quizzes Answered Correctly</option>
+    </select>
+</div>
 <div class="svg-wrapper" id="vizWrapper">
     <svg id="viz"></svg>
 </div>

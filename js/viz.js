@@ -42,7 +42,8 @@
     function processData(payload) {
         let filteredEngagementData = _.filter(payload.engagementData, o => ['opened', 'closed'].indexOf(o.event) < 0 )
         let userToEngagementData = _.groupBy(filteredEngagementData, o => o.user_id)
-        // console.log('userToEngagementData', userToEngagementData, payload.quizData)
+        let userToQuizData = _.groupBy(payload.quizData, o => o.user_id)
+        // console.log('userToEngagementData, userToQuizData', userToEngagementData, userToQuizData)
         let minTs = _.min(filteredEngagementData.map(o => new Date(o.start_time).getTime()))
         let maxTs = _.max(filteredEngagementData.map(o => new Date(o.end_time).getTime()))
         console.log('minTs, maxTs', minTs, maxTs)
@@ -54,6 +55,7 @@
 
         return {
             userToEngagementData,
+            userToQuizData,
             userIdToEmail,
             users: Object.keys(userToEngagementData),
             minTs,
@@ -106,6 +108,7 @@
         data.users.forEach((userId, userIndex) => {
             let userEmail = data.userIdToEmail[userId]
             let engagementData = data.userToEngagementData[userId]
+            let quizData = data.userToQuizData[userId]
             let gUserEngagement = gRoot.append('svg:g')
                         .classed('user-engagement', true)
                 .attr('transform', 'translate('+[0, userIndex * (config.barHeight + config.barGap)]+')')
@@ -145,6 +148,27 @@
 
             gText.append('svg:title')
                 .text(userLabel)
+
+            if (quizData) {
+                let gUserQuiz = gRoot.append('svg:g')
+                    .classed('user-quiz', true)
+                    .attr('transform', 'translate('+[0, userIndex * (config.barHeight + config.barGap)]+')')
+                quizData.forEach(o => {
+                    let ts = new Date(o['@timestamp']).getTime()
+                    // TODO: get correct quiz data file and remove this offset
+                    let x = xScale(ts) + 73321
+                    let isCorrect = o.message === 'Zombie::QuestionAnsweredCorrectly'
+                    let isIncorrect = o.message === 'Zombie::QuestionAnsweredIncorrectly'
+                    gUserQuiz.append('svg:circle')
+                        .classed('answer-correct', isCorrect)
+                        .classed('answer-incorrect', isIncorrect)
+                        .attr('cx', x)
+                        .attr('cy', config.barHeight / 2)
+                        .attr('r', 3)
+                        .append('title')
+                        .text(`Response: ${o.response}`)
+                })
+            }
         })
     }
 

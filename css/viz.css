@@ -22,3 +22,11 @@ g.user-engagement text.user-label {
     font-size: 10px;
     text-shadow: 1px 1px 1px #fff;
 }
+g.user-quiz circle.answer-correct {
+    fill: green;
+    stroke: white;
+}
+g.user-quiz circle.answer-incorrect {
+    fill: red;
+    stroke: white;
+}

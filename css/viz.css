@@ -19,9 +19,11 @@ g.user-engagement rect.user-timeline {
 }
 g.user-engagement rect.attention {
     fill: #71c51f;
+    fill-opacity: 0.7;
 }
 g.user-engagement rect.distraction {
     fill: #bd3209;
+    fill-opacity: 0.7;
 }
 g.user-engagement text.user-label {
     font-family: Courier, serif;

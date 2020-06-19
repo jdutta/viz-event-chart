@@ -48,11 +48,17 @@
     }
 
     function loadDataFiles() {
-        let p1 = d3.json(engagementDataFile).then(data => {
-            distractedEngagedData = data
+        let p1 = new Promise(function (resolve, reject) {
+            d3.json(engagementDataFile, function (error, data) {
+                distractedEngagedData = data
+                resolve()
+            })
         })
-        let p2 = d3.json(quizDataFile).then(data => {
-            quizData = data
+        let p2 = new Promise(function (resolve, reject) {
+            d3.json(quizDataFile, function (error, data) {
+                quizData = data
+                resolve()
+            })
         })
         return Promise.all([p1, p2])
     }

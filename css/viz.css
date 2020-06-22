@@ -30,12 +30,12 @@ g.user-engagement text.user-label {
     font-size: 10px;
     text-shadow: 1px 1px 1px #fff;
 }
-g.user-quiz circle {
-    stroke: white;
+g.user-quiz text {
+    font-weight: bold;
 }
-g.user-quiz circle.answer-correct {
+g.user-quiz text.answer-correct {
     fill: green;
 }
-g.user-quiz circle.answer-incorrect {
+g.user-quiz text.answer-incorrect {
     fill: red;
 }

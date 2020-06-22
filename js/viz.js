@@ -228,12 +228,12 @@
                     let x = xScale(ts)
                     let isCorrect = o.message === 'Zombie::QuestionAnsweredCorrectly'
                     let isIncorrect = o.message === 'Zombie::QuestionAnsweredIncorrectly'
-                    gUserQuiz.append('svg:circle')
+                    gUserQuiz.append('svg:text')
                         .classed('answer-correct', isCorrect)
                         .classed('answer-incorrect', isIncorrect)
-                        .attr('cx', x)
-                        .attr('cy', config.barHeight / 2)
-                        .attr('r', 5)
+                        .attr('x', x)
+                        .attr('y', config.barHeight / 2 + 5)
+                        .text(isCorrect ? '\u2713' : '\u2717')
                         .append('title')
                         .text(`Response: ${o.response}, Timestamp: ${o['@timestamp']}`)
                 })

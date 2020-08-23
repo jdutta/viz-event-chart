@@ -1,6 +1,7 @@
 (function () {
     let distractedEngagedData = []
     let quizData = []
+    let attnScoreData = []
     let vizEl = null
     let vizWrapperEl = null
     let sortInputEl = null
@@ -19,7 +20,9 @@
     let engagementDataFile = 'data/5213_time_bounded_all_users_gotcha_times.json'
     // let quizDataFile = 'data/zombie_responses_info.json'
     let quizDataFile = 'data/5213_ruts_data.json'
+    let attnScoreDataFile = 'data/5213_attn_score_data.json'
     const sortByEnums = {
+        ATTENTION_SCORE: 'attention-score',
         ATTENTION: 'attention',
         DISTRACTION: 'distraction',
         QUIZZES: 'quizzes',
@@ -29,7 +32,8 @@
     function init() {
         let drawChartPayload = {
             engagementData: distractedEngagedData,
-            quizData: quizData
+            quizData: quizData,
+            attnScoreData: attnScoreData
         }
         // console.log('init', distractedEngagedData, quizData)
         vizWrapperEl = document.getElementById('vizWrapper')
@@ -43,7 +47,7 @@
         })
         drawChart({
             ...drawChartPayload,
-            sortBy: sortByEnums.ATTENTION
+            sortBy: sortByEnums.ATTENTION_SCORE
         })
     }
 
@@ -60,7 +64,13 @@
                 resolve()
             })
         })
-        return Promise.all([p1, p2])
+        let p3 = new Promise(function (resolve, reject) {
+            d3.json(attnScoreDataFile, function (error, data) {
+                attnScoreData = data
+                resolve()
+            })
+        })
+        return Promise.all([p1, p2, p3])
     }
 
     function processData(payload) {
@@ -75,6 +85,11 @@
         let userIdToEmail = {}
         payload.quizData.forEach(o => {
             userIdToEmail[o.user_id] = o.user_email
+        })
+
+        let userToAttnScore = {}
+        payload.attnScoreData.forEach(o => {
+            userToAttnScore[o.user_id] = o.attn_score
         })
 
         let userStats = {} // userId -> { totalAttention, totalDistraction, totalQuizzes, totalCorrectAnswers }
@@ -99,6 +114,7 @@
             }
 
             userStats[userId] = {
+                attnScore: userToAttnScore[userId] || 0,
                 totalAttention,
                 totalDistraction,
                 totalQuizzes,
@@ -108,6 +124,7 @@
         // console.log('userStats', userStats)
 
         const sortByToField = {
+            [sortByEnums.ATTENTION_SCORE]: 'attnScore',
             [sortByEnums.ATTENTION]: 'totalAttention',
             [sortByEnums.DISTRACTION]: 'totalDistraction',
             [sortByEnums.QUIZZES]: 'totalQuizzes',
@@ -209,11 +226,13 @@
                     .text(`${isAttention ? 'Attention' : 'Distraction'} span for user ${o.user_id} from ${o.start_time} to ${o.end_time}`)
             })
             let userLabel = userEmail || `User ${userId}`
+            let attnScore = data.userStats[userId].attnScore
+            let userLabelWithAttnScore = `[${attnScore}] ${userLabel}`
             let gText = gUserEngagement.append('svg:text')
                 .classed('user-label', true)
                 .attr('x', 0)
                 .attr('y', 15)
-                .text(userLabel)
+                .text(userLabelWithAttnScore)
             gText.each(textEllipsis(config.userLabelWidth, 0))
 
             gText.append('svg:title')

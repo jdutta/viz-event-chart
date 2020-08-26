@@ -30,6 +30,9 @@ g.user-engagement text.user-label {
     font-size: 10px;
     text-shadow: 1px 1px 1px #fff;
 }
+g.user-engagement text.user-label.clickable {
+    cursor: pointer;
+}
 g.user-quiz text {
     font-weight: bold;
 }

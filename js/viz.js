@@ -13,6 +13,7 @@
             left: 10
         },
         userLabelWidth: 150,
+        userLabelClickable: true,
         barHeight: 20,
         barGap: 5
     }
@@ -150,6 +151,11 @@
         }
     }
 
+    function onUserLabelClick(payload) {
+        console.log('user', payload)
+        alert('TODO action for User ' + payload.userId)
+    }
+
     function textEllipsis(width, padding) {
         return function () {
             let self = d3.select(this),
@@ -230,6 +236,7 @@
             let userLabelWithAttnScore = `[${attnScore}] ${userLabel}`
             let gText = gUserEngagement.append('svg:text')
                 .classed('user-label', true)
+                .classed('clickable', config.userLabelClickable)
                 .attr('x', 0)
                 .attr('y', 15)
                 .text(userLabelWithAttnScore)
@@ -237,6 +244,15 @@
 
             gText.append('svg:title')
                 .text(userLabel + ': ' + JSON.stringify(data.userStats[userId]))
+
+            if (config.userLabelClickable) {
+                gText.on('click', function () {
+                    onUserLabelClick({
+                        userId: userId,
+                        userEmail: userEmail || ''
+                    })
+                })
+            }
 
             if (quizData) {
                 let gUserQuiz = gRoot.append('svg:g')

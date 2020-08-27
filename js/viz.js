@@ -153,7 +153,6 @@
 
     function onUserLabelClick(payload) {
         console.log('user', payload)
-        alert('TODO action for User ' + payload.userId)
     }
 
     function textEllipsis(width, padding) {
@@ -167,6 +166,18 @@
                 textLength = self.node().getComputedTextLength();
             }
         }
+    }
+
+    function getFormattedUserStatsForTooltip(stats) {
+        let text = ''
+        _.forOwn(stats, function (v, k) {
+            if (text) {
+                text += '\n'
+            }
+            text += k + ': ' + v
+        })
+        text += '\n\nClick to take action'
+        return text
     }
 
     function removeChildNodes(el) {
@@ -243,7 +254,7 @@
             gText.each(textEllipsis(config.userLabelWidth, 0))
 
             gText.append('svg:title')
-                .text(userLabel + ': ' + JSON.stringify(data.userStats[userId]))
+                .text(userLabel + '\n\n' + getFormattedUserStatsForTooltip(data.userStats[userId]))
 
             if (config.userLabelClickable) {
                 gText.on('click', function () {

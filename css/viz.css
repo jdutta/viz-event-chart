@@ -14,6 +14,28 @@
     overflow: auto;
 }
 
+.svg-wrapper .tooltip {
+    position: absolute;
+    left: -9999px;
+    background-color: #eff4ff;
+    font-size: 12px;
+    padding: 5px 5px;
+    box-shadow: 0 0 1px 1px #759dff;
+}
+
+.svg-wrapper .tooltip .user-info {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.svg-wrapper .tooltip .user-stats {
+    margin-bottom: 5px;
+}
+
+.svg-wrapper .tooltip button.action-remedial {
+    color: #ff756d;
+}
+
 g.user-engagement rect.user-timeline {
     fill: #f7f7f7;
 }

@@ -4,6 +4,16 @@
     let attnScoreData = []
     let vizEl = null
     let vizWrapperEl = null
+    let tooltipModel = {
+        selector: '.svg-wrapper .tooltip',
+        selectorUserInfo: '.svg-wrapper .tooltip .user-info',
+        selectorUserStats: '.svg-wrapper .tooltip .user-stats',
+        selectorActionDetails: '.svg-wrapper .tooltip .action-details',
+        selectorActionRemedial: '.svg-wrapper .tooltip .action-remedial',
+        width: 200,
+        height: 120,
+        currentUser: null
+    }
     let sortInputEl = null
     let config = {
         margin: {
@@ -176,8 +186,58 @@
             }
             text += k + ': ' + v
         })
-        text += '\n\nClick to take action'
         return text
+    }
+
+    function getHtmlFormattedUserStatsForTooltip(stats) {
+        let text = ''
+        _.forOwn(stats, function (v, k) {
+            if (text) {
+                text += '<br>'
+            }
+            text += k + ': ' + v
+        })
+        return text
+    }
+
+    function onUserLabelMouseOver(payload) {
+        let labelEl = d3.select(this)
+        let labelRect = this.getBoundingClientRect()
+        tooltipModel.currentUser = payload
+        d3.select(tooltipModel.selectorUserInfo).html(payload.userEmail || `User ${payload.userId}`)
+        d3.select(tooltipModel.selectorUserStats).html(getHtmlFormattedUserStatsForTooltip(payload.stats))
+
+        d3.select(tooltipModel.selector)
+            .transition()
+            .style('opacity', 1)
+            // .style('width', tooltipModel.width)
+            .style('height', tooltipModel.height)
+            .style('left', labelRect.right)
+            .style('top', labelRect.top - tooltipModel.height / 2)
+    }
+
+    function onUserLabelMouseOut() {
+        d3.select(tooltipModel.selector)
+            .transition().duration(1000).style('opacity', 0)
+            .transition()
+            .style('left', -9999)
+    }
+
+    function onTooltipMouseOver() {
+        d3.select(tooltipModel.selector).transition()
+            .style('opacity', 1)
+    }
+
+    function onTooltipMouseOut() {
+        onUserLabelMouseOut()
+    }
+
+    function onTooltipActionShowDetails() {
+        console.log('show details', tooltipModel.currentUser)
+    }
+
+    function onTooltipActionRemedial() {
+        console.log('take remedial action', tooltipModel.currentUser)
     }
 
     function removeChildNodes(el) {
@@ -253,9 +313,25 @@
                 .text(userLabelWithAttnScore)
             gText.each(textEllipsis(config.userLabelWidth, 0))
 
+            /*
             gText.append('svg:title')
                 .text(userLabel + '\n\n' + getFormattedUserStatsForTooltip(data.userStats[userId]))
+            //*/
 
+            gText.on('mouseover', function () {
+                onUserLabelMouseOver.call(this, {
+                    userId,
+                    userEmail,
+                    stats: data.userStats[userId]
+                })
+            })
+            gText.on('mouseout', onUserLabelMouseOut)
+            d3.select(tooltipModel.selector).on('mouseover', onTooltipMouseOver)
+            d3.select(tooltipModel.selector).on('mouseout', onTooltipMouseOut)
+            d3.select(tooltipModel.selectorActionDetails).on('click', onTooltipActionShowDetails)
+            d3.select(tooltipModel.selectorActionRemedial).on('click', onTooltipActionRemedial)
+
+            /*
             if (config.userLabelClickable) {
                 gText.on('click', function () {
                     onUserLabelClick({
@@ -264,6 +340,7 @@
                     })
                 })
             }
+            //*/
 
             if (quizData) {
                 let gUserQuiz = gRoot.append('svg:g')

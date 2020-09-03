@@ -358,7 +358,7 @@
                         .attr('y', config.barHeight / 2 + 5)
                         .text(isCorrect ? '\u2713' : '\u2717')
                         .append('title')
-                        .text(`Response: ${o.response}, Timestamp: ${o['@timestamp']}`)
+                        .text(`Response: ${o.response}\nScore: ${o.score}\nTimestamp: ${o['@timestamp']}`)
                 })
             }
         })
